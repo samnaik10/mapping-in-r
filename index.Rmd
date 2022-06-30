@@ -1,0 +1,17 @@
+---
+title: "index.Rmd"
+author: "Samruddhi Naik"
+date: '2022-06-30'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidycensus)
+library(tidyverse)
+library(ggthemes)
+library(tigris)
+```
+
+Hi, my name is Samruddhi Naik. I'll be using the Census Bureau data to create maps.
+
