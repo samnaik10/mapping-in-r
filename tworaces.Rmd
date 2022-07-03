@@ -1,0 +1,45 @@
+---
+title: "tworaces.Rmd"
+author: "Samruddhi Naik"
+date: '2022-06-30'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidycensus)
+library(tidyverse)
+library(ggthemes)
+library(tigris)
+```
+
+The map we made shows the percentage of population who are two or more races.
+
+
+```{r}
+
+continental <- state.name[! state.name %in% c("Alaska", "Hawaii")]
+
+races <- get_acs(geography = "tract", 
+                variables = c("B02001_008", "B02001_009", "B02001_010"), 
+                year = 2018, state = continental, 
+                geometry = TRUE, summary_var = "B02001_001") 
+
+graph <- races |>
+  mutate(Percent = (estimate/summary_est)*100) |>
+  ggplot(aes(fill = Percent)) +
+    geom_sf(size = 0.003) +
+    scale_fill_viridis_c(direction = -1, option = "inferno") +
+    labs(title = "Percent of People Who are Teo or More Races by Census Tract",
+         fill = "Percent",
+         caption = "Source: American Community Survey 2014-2018") +
+    theme_void()
+
+write_rds(graph, file = "races_map.rds")
+
+```
+
+```{r}
+read_rds("races_map.rds")
+```
+
