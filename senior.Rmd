@@ -1,0 +1,50 @@
+---
+title: "senior.Rmd"
+author: "Samruddhi Naik"
+date: '2022-07-03'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidycensus)
+library(tidyverse)
+library(ggthemes)
+library(tigris)
+```
+
+The map we made shows the percentage of seniors in the population.
+
+```{r}
+glimpse(pums_variables)
+
+nw_states <- c("OR", "WA", "ID")
+
+nw_pums <- get_pums(variables = c("AGEP", "PUMA"), 
+                    state = nw_states, recode = TRUE, 
+                    survey = "acs1", year = 2019)
+
+nw_Senior <- nw_pums |> 
+              group_by(ST, PUMA) |>
+              summarize(total_pop = sum(PWGTP), 
+                        pct_Senior = sum(PWGTP[AGEP > 64])/total_pop) |>
+              ungroup()
+
+nw_pumas <- map(nw_states, tigris::pumas, class="sf", 
+                cb=TRUE, year = 2019) |> 
+  reduce(rbind)
+
+nw_final <- left_join(nw_pumas, nw_Senior, by = c("STATEFP10" = "ST", "PUMACE10" = "PUMA"))
+
+nw_final |> 
+  ggplot(aes(fill = pct_Senior)) +
+  geom_sf() +
+  scale_fill_viridis_b(name = NULL, option = "magma",
+                       labels = scales::label_percent(1)) +
+  labs(title = "Percentage of population that are Seniors",
+       caption = "Source: American Community Survey",
+       fill = NULL) +
+  theme_void()
+
+```
+
